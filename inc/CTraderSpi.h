@@ -75,7 +75,19 @@ public:
 	/// Trade information returned
 	virtual void OnRtnTrade(CThostFtdcTradeField *pTrade);
 
-private:
+
+	//get the CThostFtdcInputOrderField according to trade type
+	// gTradeType = 0 :limit order
+	// gTradeType = 1 :market order
+	// gTradeType = 2 :condition order
+	// gTradeType = 3 :FOK order
+	// gTradeType = 4 :FAK order
+	CThostFtdcInputOrderField GetOrderField(int gTradeType);
+
+	//request order insert according to para CThostFtdcInputOrderField
+	void ReqOrderInsertBy(CThostFtdcInputOrderField req);
+
+//private:
 	/// Request user login 
 	void ReqUserLogin();
 	/// Request investor settlement information confirm 
