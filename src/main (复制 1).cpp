@@ -14,7 +14,7 @@ using namespace std;
 
 //configuration parameter
 //read config.ini file and asign to the global varibles
-void readLoginConfig(char* filePath);
+void readConfig(char* filePath);
 
 // Api pointer
 CThostFtdcTraderApi* pTradeUserApi = NULL;
@@ -24,6 +24,12 @@ char gTradeFrontAddr[] = "tcp://180.168.146.187:10000";//10030 10000
 TThostFtdcBrokerIDType gBrokerID ;		//code of the broker
 TThostFtdcInvestorIDType gInvestorID ;
 TThostFtdcPasswordType gInvestorPassword ;
+TThostFtdcInstrumentIDType gTraderInstrumentID ;
+TThostFtdcDirectionType gTradeDirection = THOST_FTDC_D_Buy; //THOST_FTDC_D_Sell or THOST_FTDC_D_Buy
+int gTradeType=0;
+TThostFtdcPriceType gLimitPrice = 14260;
+TThostFtdcPriceType gStopPrice = 14250;
+int gVolume = 5;
 
 // state flag
 bool isFrontConnected = 0;
@@ -63,7 +69,7 @@ int main(int argc,char* argv[])
 				// printf("-b: Broker ID\n");
 				// printf("-i: Investor ID\n");
 				// printf("-p: Investor Password\n");
-				printf("-f: login config filepath\n");
+				printf("-f: config filepath\n");
 				// printf("-n: Sum of instrument\n");
 				printf("-h: Help to list the options\n");
 				exit(0);
@@ -77,10 +83,15 @@ int main(int argc,char* argv[])
 		}
 	}
 
-	readLoginConfig(filePath);
+	readConfig(filePath);
 	printf("gBrokerID=%s\n", gBrokerID);
 	printf("gInvestorID=%s\n", gInvestorID);
 	printf("gInvestorPassword=%s\n", gInvestorPassword);
+	printf("gTradeType=%d\n", gTradeType);
+	printf("gTraderInstrumentID=%s\n", gTraderInstrumentID);
+	printf("gTradeDirection=%c\n", gTradeDirection);
+	printf("gLimitPrice=%lf\n", gLimitPrice);
+	printf("gVolume=%d\n", gVolume);
 
     //TraderSpi
     pTradeUserApi = CThostFtdcTraderApi::CreateFtdcTraderApi();
@@ -93,19 +104,28 @@ int main(int argc,char* argv[])
 
     while(!isConfirm){}
     while(isConfirm){
-    	printf("Please Enter orderConfig.ini path:\n");
+    	printf("Please Enter config.ini path:\n");
     	scanf("%s",filePath);
-    	pTradeUserSpi->ReqOrderInsertBy(pTradeUserSpi->ReadOrderFieldIni(filePath));
+    	readConfig(filePath);
+    	pTradeUserSpi->ReqOrderInsertBy(pTradeUserSpi->GetOrderField(gTradeType));
     }
+
+    
+
+    
+
+    //pTradeUserSpi->ReqOrderInsertBy(pTradeUserSpi->GetOrderField(gTradeType));
+
 
     pTradeUserApi->Join();
 
+    
 	//pTradeUserApi->Release();
 	return 0;
 }
 
-//read loginConfig.ini file and asign to the global varibles
-void readLoginConfig(char* filePath){
+//read config.ini file and asign to the global varibles
+void readConfig(char* filePath){
 	//read config.ini file
 	CIni ini;
 
@@ -121,5 +141,23 @@ void readLoginConfig(char* filePath){
 
 	char* password = ini.getStr("Investor","Password");
 	sprintf(gInvestorPassword,"%s",password);
+	
+
+	gTradeType = ini.getInt("TradePara","TradeType");
+	
+
+	char* instrumentID = ini.getStr("TradePara","TraderInstrumentID");
+	sprintf(gTraderInstrumentID,"%s",instrumentID);
+	
+
+	char* tradeDirection = ini.getStr("TradePara","TradeDirection");
+	//sprintf(gTradeDirection,"%s",tradeDirection);
+	gTradeDirection = tradeDirection[0];
+	
+
+	gLimitPrice = ini.getDouble("TradePara","LimitPrice");
+	
+
+	gVolume = ini.getInt("TradePara","Volume");
 	
 }
