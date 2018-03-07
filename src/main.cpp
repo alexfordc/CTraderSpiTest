@@ -5,11 +5,7 @@
 #include <dlfcn.h>
 #include <cstdlib>
 #include <unistd.h>
-#include "ThostFtdcMdApi.h"
-#include "ThostFtdcUserApiDataType.h"
 #include "ThostFtdcTraderApi.h"
-#include "ThostFtdcUserApiStruct.h"
-#include "CMdSpi.h"
 #include "CTraderSpi.h"
 #include "Ini.h"
 
@@ -24,23 +20,28 @@ void readConfig(char* filePath);
 CThostFtdcTraderApi* pTradeUserApi = NULL;
 
 // Trader spi
-char gTradeFrontAddr[] = "tcp://180.168.146.187:10000";
-TThostFtdcBrokerIDType gBrokerID = "9999";		//code of the broker
-TThostFtdcInvestorIDType gInvestorID = "112585";
-TThostFtdcPasswordType gInvestorPassword = "qq824073152";
-TThostFtdcInstrumentIDType gTraderInstrumentID = "al1804";
+char gTradeFrontAddr[] = "tcp://180.168.146.187:10000";//10030 10000
+TThostFtdcBrokerIDType gBrokerID ;		//code of the broker
+TThostFtdcInvestorIDType gInvestorID ;
+TThostFtdcPasswordType gInvestorPassword ;
+TThostFtdcInstrumentIDType gTraderInstrumentID ;
 TThostFtdcDirectionType gTradeDirection = THOST_FTDC_D_Buy; //THOST_FTDC_D_Sell or THOST_FTDC_D_Buy
 int gTradeType=0;
 TThostFtdcPriceType gLimitPrice = 14260;
-TThostFtdcPriceType gStopPrice = 14260;
+TThostFtdcPriceType gStopPrice = 14250;
 int gVolume = 5;
+
+// state flag
+bool isFrontConnected = 0;
+bool isLogin = 0;
+bool isConfirm = 0;
 
 //request id
 int iRequestID = 0;
 
 int main(int argc,char* argv[])
 {
-		printf("-------------\n");
+	printf("-------------\n");
 
 	//get parameters
 	if(argc < 2)
@@ -57,29 +58,9 @@ int main(int argc,char* argv[])
 	while((ch = getopt(argc, argv, "f:h"))!= -1){
 		switch(ch){
 
-			// case 'b':
-			// 	sprintf(gBrokerID,"%s",optarg);
-			// 	printf("%s\n", gBrokerID);
-			// 	break;
-
-			// case 'i':
-			// 	sprintf(gInvestorID,"%s",optarg);
-			// 	printf("%s\n", gInvestorID);
-			// 	break;
-
-			// case 'p':
-			// 	sprintf(gInvestorPassword,"%s",optarg);
-			// 	printf("%s\n", gInvestorPassword);
-			// 	break;
-
 			case 'f':
 				filePath = optarg;
 				printf("%s\n", filePath);
-				break;
-
-			// case 'n':
-			// 	instrumentNum = atoi(optarg);
-			// 	printf("%d\n", instrumentNum);
 				break;
 
 			case 'h':
@@ -103,19 +84,42 @@ int main(int argc,char* argv[])
 	}
 
 	readConfig(filePath);
+	printf("gBrokerID=%s\n", gBrokerID);
+	printf("gInvestorID=%s\n", gInvestorID);
+	printf("gInvestorPassword=%s\n", gInvestorPassword);
+	printf("gTradeType=%d\n", gTradeType);
+	printf("gTraderInstrumentID=%s\n", gTraderInstrumentID);
+	printf("gTradeDirection=%c\n", gTradeDirection);
+	printf("gLimitPrice=%lf\n", gLimitPrice);
+	printf("gVolume=%d\n", gVolume);
 
-    // TraderSpi
-    // pTradeUserApi = CThostFtdcTraderApi::CreateFtdcTraderApi();
-    // CTraderSpi *pTradeUserSpi = new CTraderSpi();
-    // pTradeUserApi->RegisterSpi((CThostFtdcTraderSpi*) pTradeUserSpi);
-    // pTradeUserApi->SubscribePublicTopic(THOST_TERT_QUICK);
-    // pTradeUserApi->SubscribePrivateTopic(THOST_TERT_QUICK);
-    // pTradeUserApi->RegisterFront(gTradeFrontAddr);
-    // pTradeUserApi->Init();
+    //TraderSpi
+    pTradeUserApi = CThostFtdcTraderApi::CreateFtdcTraderApi();
+    CTraderSpi *pTradeUserSpi = new CTraderSpi();
+    pTradeUserApi->RegisterSpi((CThostFtdcTraderSpi*) pTradeUserSpi);
+    pTradeUserApi->SubscribePublicTopic(THOST_TERT_QUICK);
+    pTradeUserApi->SubscribePrivateTopic(THOST_TERT_QUICK);
+    pTradeUserApi->RegisterFront(gTradeFrontAddr);
+    pTradeUserApi->Init();
+
+    while(!isConfirm){}
+    while(isConfirm){
+    	printf("Please Enter config.ini path:\n");
+    	scanf("%s",filePath);
+    	readConfig(filePath);
+    	pTradeUserSpi->ReqOrderInsertBy(pTradeUserSpi->GetOrderField(gTradeType));
+    }
+
+    
+
+    
+
+    //pTradeUserSpi->ReqOrderInsertBy(pTradeUserSpi->GetOrderField(gTradeType));
 
 
-    // pTradeUserApi->Join();
+    pTradeUserApi->Join();
 
+    
 	//pTradeUserApi->Release();
 	return 0;
 }
@@ -129,31 +133,31 @@ void readConfig(char* filePath){
 
 	char* brokerId = ini.getStr("Broker","ID");
 	sprintf(gBrokerID,"%s",brokerId);
-	printf("gBrokerID=%s\n", gBrokerID);
+	
 
 	char* investorId = ini.getStr("Investor","ID");
 	sprintf(gInvestorID,"%s",investorId);
-	printf("gInvestorID=%s\n", gInvestorID);
+	
 
 	char* password = ini.getStr("Investor","Password");
 	sprintf(gInvestorPassword,"%s",password);
-	printf("gInvestorPassword=%s\n", gInvestorPassword);
+	
 
 	gTradeType = ini.getInt("TradePara","TradeType");
-	printf("gTradeType=%d\n", gTradeType);
+	
 
 	char* instrumentID = ini.getStr("TradePara","TraderInstrumentID");
 	sprintf(gTraderInstrumentID,"%s",instrumentID);
-	printf("gTraderInstrumentID=%s\n", gTraderInstrumentID);
+	
 
 	char* tradeDirection = ini.getStr("TradePara","TradeDirection");
 	//sprintf(gTradeDirection,"%s",tradeDirection);
 	gTradeDirection = tradeDirection[0];
-	printf("gTradeDirection=%c\n", gTradeDirection);
+	
 
 	gLimitPrice = ini.getDouble("TradePara","LimitPrice");
-	printf("gLimitPrice=%lf\n", gLimitPrice);
+	
 
 	gVolume = ini.getInt("TradePara","Volume");
-	printf("gVolume=%d\n", gVolume);
+	
 }

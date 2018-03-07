@@ -84,6 +84,9 @@ public:
 	// gTradeType = 4 :FAK order
 	CThostFtdcInputOrderField GetOrderField(int gTradeType);
 
+	// read order config file and get the CThostFtdcInputOrderField to sent order
+	CThostFtdcInputOrderField ReadOrderFieldIni(char* filePath);
+
 	//request order insert according to para CThostFtdcInputOrderField
 	void ReqOrderInsertBy(CThostFtdcInputOrderField req);
 
