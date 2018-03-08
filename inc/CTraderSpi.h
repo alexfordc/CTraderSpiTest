@@ -1,9 +1,17 @@
 #pragma once
 #include "ThostFtdcTraderApi.h"
+#include <string>
+using namespace std;
 
 class CTraderSpi : public CThostFtdcTraderSpi
 {
 public:
+
+	CTraderSpi(char* filePath);
+
+	// 
+	~CTraderSpi();
+
 	/// Call it when the client connected with the backstage(before login)
 	virtual void OnFrontConnected();
 
@@ -116,7 +124,28 @@ public:
 	/// Request quote action
 	void ReqQuoteAction(CThostFtdcQuoteField *pQuote);
 
-	
+	// initrialize api
+	void InitApi()
+	{
+		pTradeUserApi = CThostFtdcTraderApi::CreateFtdcTraderApi();
+	    pTradeUserApi->RegisterSpi((CThostFtdcTraderSpi*) this);
+	    pTradeUserApi->SubscribePublicTopic(THOST_TERT_QUICK);
+	    pTradeUserApi->SubscribePrivateTopic(THOST_TERT_QUICK);
+	    pTradeUserApi->RegisterFront(gTradeFrontAddr);
+	    pTradeUserApi->Init();
+	    cout<<"InitApi\n";
+	}
+
+	// api join
+	void JoinApi();
+
+	// Api pointer
+	CThostFtdcTraderApi* pTradeUserApi = NULL;
+
+	// state flag
+	bool isFrontConnected = 0;
+	bool isLogin = 0;
+	bool isConfirm = 0;
 
 private:
 	/// Receive a successful response or not
@@ -133,4 +162,35 @@ private:
 	bool IsTradingExecOrder(CThostFtdcExecOrderField *pExecOrder);
 	/// An unrevoked trading quote or not
 	bool IsTradingQuote(CThostFtdcQuoteField *pQuote);
+
+	
+
+	// Trader spi
+	//char gTradeFrontAddr[] = "tcp://180.168.146.187:10000";//10030 10000
+	string sTradeFrontAddr;
+	char* gTradeFrontAddr;
+	TThostFtdcBrokerIDType gBrokerID ;		//code of the broker
+	TThostFtdcInvestorIDType gInvestorID ;
+	TThostFtdcPasswordType gInvestorPassword ;
+
+
+
+	//request id
+	int iRequestID = 0;
+
+	// configure used in orderinserting
+	TThostFtdcInstrumentIDType gTraderInstrumentID;		//instrument id
+	TThostFtdcPriceType gLimitPrice; //limit price
+	TThostFtdcPriceType gStopPrice; //stop price
+	int gTradeType;// trade request type;
+	// int gVolume; //volume
+	// TThostFtdcDirectionType gTradeDirection;//Trading direction
+
+	// session parameters 
+	TThostFtdcFrontIDType frontID; 		//front id
+	TThostFtdcSessionIDType	sessionID;		//session id
+	TThostFtdcOrderRefType	gOrderRef;		//order reference
+	TThostFtdcOrderRefType	exeOrderRef;	//execute order reference 
+	TThostFtdcOrderRefType	forquoteRef;	//for quote reference
+	TThostFtdcOrderRefType	quoteRef;		//quote reference
 };

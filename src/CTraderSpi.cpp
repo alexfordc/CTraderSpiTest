@@ -8,37 +8,37 @@
 #include "Ini.h"
 using namespace std;
 
-// USER_API parameter
-extern CThostFtdcTraderApi* pTradeUserApi;
+// // USER_API parameter
+// extern CThostFtdcTraderApi* pTradeUserApi;
 
-// configure parameter
-extern char gTradeFrontAddr[];               //front address
-extern TThostFtdcBrokerIDType gBrokerID;				    //broker id
-extern TThostFtdcInvestorIDType gInvestorID;				//investor id
-extern TThostFtdcPasswordType gInvestorPassword;			//investor password
+// // configure parameter
+// extern char gTradeFrontAddr[];               //front address
+// extern TThostFtdcBrokerIDType gBrokerID;				    //broker id
+// extern TThostFtdcInvestorIDType gInvestorID;				//investor id
+// extern TThostFtdcPasswordType gInvestorPassword;			//investor password
 
-// configure used in orderinserting
-TThostFtdcInstrumentIDType gTraderInstrumentID;		//instrument id
-TThostFtdcPriceType gLimitPrice; //limit price
-TThostFtdcPriceType gStopPrice; //stop price
-int gTradeType;// trade request type;
-// int gVolume; //volume
-// TThostFtdcDirectionType gTradeDirection;//Trading direction
+// // configure used in orderinserting
+// TThostFtdcInstrumentIDType gTraderInstrumentID;		//instrument id
+// TThostFtdcPriceType gLimitPrice; //limit price
+// TThostFtdcPriceType gStopPrice; //stop price
+// int gTradeType;// trade request type;
+// // int gVolume; //volume
+// // TThostFtdcDirectionType gTradeDirection;//Trading direction
 
-// state flag
-extern bool isFrontConnected;
-extern bool isConfirm;
+// // state flag
+// extern bool isFrontConnected;
+// extern bool isConfirm;
 
-// request id
-extern int iRequestID;
+// // request id
+// extern int iRequestID;
 
-// session parameters 
-TThostFtdcFrontIDType frontID; 		//front id
-TThostFtdcSessionIDType	sessionID;		//session id
-TThostFtdcOrderRefType	gOrderRef;		//order reference
-TThostFtdcOrderRefType	exeOrderRef;	//execute order reference 
-TThostFtdcOrderRefType	forquoteRef;	//for quote reference
-TThostFtdcOrderRefType	quoteRef;		//quote reference
+// // session parameters 
+// TThostFtdcFrontIDType frontID; 		//front id
+// TThostFtdcSessionIDType	sessionID;		//session id
+// TThostFtdcOrderRefType	gOrderRef;		//order reference
+// TThostFtdcOrderRefType	exeOrderRef;	//execute order reference 
+// TThostFtdcOrderRefType	forquoteRef;	//for quote reference
+// TThostFtdcOrderRefType	quoteRef;		//quote reference
 
 // 
 bool IsFlowControl(int iResult)
@@ -49,7 +49,6 @@ bool IsFlowControl(int iResult)
 void CTraderSpi::OnFrontConnected()
 {
 	cout << "--->>> " << "OnFrontConnected" << endl;
-
 	// set flag
 	isFrontConnected = 1;
 	/// user login requst
@@ -499,4 +498,50 @@ void CTraderSpi::ReqOrderInsertBy(CThostFtdcInputOrderField req)
 	int iResult = pTradeUserApi->ReqOrderInsert(&req, ++iRequestID);
 	cout << "iRequestID=" <<iRequestID<<endl;
 	cout << "--->>> request order insert : " << iResult << ((iResult == 0) ? ", Succeed" : ", Failed") << endl;
+}
+
+// constructure
+CTraderSpi::CTraderSpi(char* filePath)
+{
+	//read config.ini file
+	CIni ini;
+
+	ini.openFile(filePath,"r");
+
+	gTradeFrontAddr = new char [50];
+	strcpy(gTradeFrontAddr,"tcp://180.168.146.187:10000"); // 10000 10030
+
+	char* brokerId = ini.getStr("Broker","ID");
+	sprintf(gBrokerID,"%s",brokerId);
+	
+
+	char* investorId = ini.getStr("Investor","ID");
+	sprintf(gInvestorID,"%s",investorId);
+
+	char* password = ini.getStr("Investor","Password");
+	sprintf(gInvestorPassword,"%s",password);
+
+	printf("gTradeFrontAddr=%s\n", gTradeFrontAddr);
+	printf("gBrokerID=%s\n", gBrokerID);
+	printf("gInvestorID=%s\n", gInvestorID);
+	printf("gInvestorPassword=%s\n", gInvestorPassword);
+
+
+}
+
+// // initrialize api
+// void CTraderSpi::InitApi()
+// {
+// 	pTradeUserApi = CThostFtdcTraderApi::CreateFtdcTraderApi();
+//     pTradeUserApi->RegisterSpi((CThostFtdcTraderSpi*) this);
+//     pTradeUserApi->SubscribePublicTopic(THOST_TERT_QUICK);
+//     pTradeUserApi->SubscribePrivateTopic(THOST_TERT_QUICK);
+//     pTradeUserApi->RegisterFront(gTradeFrontAddr);
+//     pTradeUserApi->Init();
+// }
+
+// join api
+void CTraderSpi::JoinApi()
+{
+    pTradeUserApi->Join();
 }

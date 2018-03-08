@@ -16,22 +16,7 @@ using namespace std;
 //read config.ini file and asign to the global varibles
 void readLoginConfig(char* filePath);
 
-// Api pointer
-CThostFtdcTraderApi* pTradeUserApi = NULL;
 
-// Trader spi
-char gTradeFrontAddr[] = "tcp://180.168.146.187:10000";//10030 10000
-TThostFtdcBrokerIDType gBrokerID ;		//code of the broker
-TThostFtdcInvestorIDType gInvestorID ;
-TThostFtdcPasswordType gInvestorPassword ;
-
-// state flag
-bool isFrontConnected = 0;
-bool isLogin = 0;
-bool isConfirm = 0;
-
-//request id
-int iRequestID = 0;
 
 int main(int argc,char* argv[])
 {
@@ -77,49 +62,20 @@ int main(int argc,char* argv[])
 		}
 	}
 
-	readLoginConfig(filePath);
-	printf("gBrokerID=%s\n", gBrokerID);
-	printf("gInvestorID=%s\n", gInvestorID);
-	printf("gInvestorPassword=%s\n", gInvestorPassword);
-
     //TraderSpi
-    pTradeUserApi = CThostFtdcTraderApi::CreateFtdcTraderApi();
-    CTraderSpi *pTradeUserSpi = new CTraderSpi();
-    pTradeUserApi->RegisterSpi((CThostFtdcTraderSpi*) pTradeUserSpi);
-    pTradeUserApi->SubscribePublicTopic(THOST_TERT_QUICK);
-    pTradeUserApi->SubscribePrivateTopic(THOST_TERT_QUICK);
-    pTradeUserApi->RegisterFront(gTradeFrontAddr);
-    pTradeUserApi->Init();
+    CTraderSpi *pTradeUserSpi = new CTraderSpi(filePath);
 
-    while(!isConfirm){}
-    while(isConfirm){
+    pTradeUserSpi->InitApi();
+
+    while(!pTradeUserSpi->isConfirm){}
+    while(pTradeUserSpi->isConfirm){
     	printf("Please Enter orderConfig.ini path:\n");
     	scanf("%s",filePath);
     	pTradeUserSpi->ReqOrderInsertBy(pTradeUserSpi->ReadOrderFieldIni(filePath));
     }
 
-    pTradeUserApi->Join();
+    pTradeUserSpi->JoinApi();
 
 	//pTradeUserApi->Release();
 	return 0;
-}
-
-//read loginConfig.ini file and asign to the global varibles
-void readLoginConfig(char* filePath){
-	//read config.ini file
-	CIni ini;
-
-	ini.openFile(filePath,"r");
-
-	char* brokerId = ini.getStr("Broker","ID");
-	sprintf(gBrokerID,"%s",brokerId);
-	
-
-	char* investorId = ini.getStr("Investor","ID");
-	sprintf(gInvestorID,"%s",investorId);
-	
-
-	char* password = ini.getStr("Investor","Password");
-	sprintf(gInvestorPassword,"%s",password);
-	
 }
