@@ -204,73 +204,9 @@ void CTraderSpi::OnRspQryInvestorPosition(CThostFtdcInvestorPositionField *pInve
 	if (bIsLast && !IsErrorRspInfo(pRspInfo))
 	{
 		cout<<"todo..."<<endl;
-		///Order insert requst
-		//ReqOrderInsert();
 		cout<<"QryInvestorPosition ok\n";
-		///Execute order insert requst
-		// ReqExecOrderInsert();
-		///For quote insert requst
-		// ReqForQuoteInsert();
-		///quote insert requst
-		// ReqQuoteInsert();
 	}
 }
-
-
-
-// //request order insert
-// void CTraderSpi::ReqOrderInsert()
-// {
-// 	CThostFtdcInputOrderField req;
-// 	memset(&req, 0, sizeof(req));
-// 	///Broder id
-// 	strcpy(req.BrokerID, gBrokerID);
-// 	///inverstor id
-// 	strcpy(req.InvestorID, gInvestorID);
-// 	///instrument id
-// 	strcpy(req.InstrumentID, gTraderInstrumentID);
-// 	///order reference
-// 	strcpy(req.OrderRef, gOrderRef);
-// 	///user id
-// //	TThostFtdcUserIDType	UserID;
-// 	///order price type: limit price
-// 	req.OrderPriceType = THOST_FTDC_OPT_LimitPrice;
-// 	///Trade direction: 
-// 	req.Direction = gTradeDirection;
-// 	///combine offset flag: open
-// 	req.CombOffsetFlag[0] = THOST_FTDC_OF_Open;
-// 	///combine hedge flag
-// 	req.CombHedgeFlag[0] = THOST_FTDC_HF_Speculation;
-// 	///price
-// 	req.LimitPrice = gLimitPrice;
-// 	///volume: 1
-// 	req.VolumeTotalOriginal = gVolume;
-// 	///Time condition: 
-// 	req.TimeCondition = THOST_FTDC_TC_GFD;
-// 	///GTD date
-// //	TThostFtdcDateType	GTDDate;
-// 	///Volume condition
-// 	req.VolumeCondition = THOST_FTDC_VC_AV;
-// 	///Minimum volume: 1
-// 	req.MinVolume = 1;
-// 	///contingent condition
-// 	req.ContingentCondition = THOST_FTDC_CC_Immediately;
-// 	///stop price
-// //	TThostFtdcPriceType	StopPrice;
-// 	///Force close reason
-// 	req.ForceCloseReason = THOST_FTDC_FCC_NotForceClose;
-// 	///is auto suspend: not
-// 	req.IsAutoSuspend = 0;
-// 	///business unit
-// //	TThostFtdcBusinessUnitType	BusinessUnit;
-// 	///requst id
-// //	TThostFtdcRequestIDType	RequestID;
-// 	///User force close flag
-// 	req.UserForceClose = 0;
-
-// 	int iResult = pTradeUserApi->ReqOrderInsert(&req, ++iRequestID);
-// 	cout << "--->>> request order insert : " << iResult << ((iResult == 0) ? ", Succeed" : ", Failed") << endl;
-// }
 
 void CTraderSpi::OnRspOrderInsert(CThostFtdcInputOrderField *pInputOrder, CThostFtdcRspInfoField *pRspInfo, int nRequestID, bool bIsLast)
 {
@@ -393,128 +329,6 @@ bool CTraderSpi::IsTradingOrder(CThostFtdcOrderField *pOrder)
 			(pOrder->OrderStatus != THOST_FTDC_OST_AllTraded));
 }
 
-//get the CThostFtdcInputOrderField according to trade type
-// CThostFtdcInputOrderField CTraderSpi::GetOrderField(int gTradeType){
-// 	// OrderField used in OrderInsert
-// 	CThostFtdcInputOrderField req;
-
-
-// 	////////////////same
-// 	memset(&req, 0, sizeof(req));
-// 	///Broder id
-// 	strcpy(req.BrokerID, gBrokerID);
-// 	///inverstor id
-// 	strcpy(req.InvestorID, gInvestorID);
-// 	///instrument id
-// 	strcpy(req.InstrumentID, gTraderInstrumentID);
-// 	///order reference
-// 	strcpy(req.OrderRef, gOrderRef);
-// 	///Trade direction: 
-// 	req.Direction = gTradeDirection;
-// 	///combine offset flag: open
-// 	req.CombOffsetFlag[0] = THOST_FTDC_OF_Open;
-// 	///combine hedge flag
-// 	req.CombHedgeFlag[0] = THOST_FTDC_HF_Speculation;
-// 	///volume: defult:1
-// 	req.VolumeTotalOriginal = gVolume;
-// 	///Minimum volume: 1
-// 	req.MinVolume = 1;
-// 	///Force close reason
-// 	req.ForceCloseReason = THOST_FTDC_FCC_NotForceClose;
-// 	///is auto suspend: not
-// 	req.IsAutoSuspend = 0;
-// 	///business unit
-// 	//	TThostFtdcBusinessUnitType	BusinessUnit;
-// 	///requst id
-// 	//	TThostFtdcRequestIDType	RequestID;
-// 	///User force close flag
-// 	req.UserForceClose = 0;
-// 	////////////////same
-
-
-// 	////////////////unture
-// 	///contingent condition
-// 	req.ContingentCondition = THOST_FTDC_CC_Immediately;
-// 	////////////////unture
-
-// 	// limit order
-// 	if(gTradeType == 0)
-// 	{
-// 		///order price type: limit price
-// 		req.OrderPriceType = THOST_FTDC_OPT_LimitPrice;
-// 		///price
-// 		req.LimitPrice = gLimitPrice;
-// 		///Time condition: 
-// 		req.TimeCondition = THOST_FTDC_TC_GFD;
-// 		///Volume condition
-// 		///type of volume condition
-// 		//THOST_FTDC_VC_AV:any volume
-// 		//THOST_FTDC_VC_MV:minimem volume
-// 		//THOST_FTDC_VC_CV:all the volume
-// 		req.VolumeCondition = THOST_FTDC_VC_AV;
-// 	}
-// 	// market order
-// 	else if(gTradeType == 1)
-// 	{
-// 		///order price type: limit price
-// 		req.OrderPriceType = THOST_FTDC_OPT_AnyPrice;
-// 		// price
-// 		req.LimitPrice = 0;
-// 		// valuid type
-// 		///Time condition: 
-// 		req.TimeCondition = THOST_FTDC_TC_IOC;
-// 		req.VolumeCondition = THOST_FTDC_VC_AV;
-// 	}
-// 	// condition order
-// 	else if (gTradeType == 2)
-// 	{
-// 		///contingent condition, this para can change
-// 		req.ContingentCondition = THOST_FTDC_CC_Immediately;
-// 		//stop price
-// 		//triggered when price falls or rises to this price
-// 		req.StopPrice = gStopPrice;
-// 		req.OrderPriceType = THOST_FTDC_OPT_LimitPrice;
-// 		///price
-// 		req.LimitPrice = gLimitPrice;
-// 		///Time condition: 
-// 		req.TimeCondition = THOST_FTDC_TC_GFD;
-// 		req.VolumeCondition = THOST_FTDC_VC_AV;
-// 	}
-// 	//FOK order
-// 	else if(gTradeType == 3)
-// 	{
-// 		///order price type: limit price
-// 		req.OrderPriceType = THOST_FTDC_OPT_LimitPrice;
-// 		// price
-// 		req.LimitPrice = gLimitPrice;
-// 		// valuid type
-// 		///Time condition: 
-// 		req.TimeCondition = THOST_FTDC_TC_IOC;
-// 		req.VolumeCondition = THOST_FTDC_VC_CV;
-// 	}
-// 	//FAK order
-// 	else if(gTradeType == 4)
-// 	{
-// 		///order price type: limit price
-// 		req.OrderPriceType = THOST_FTDC_OPT_LimitPrice;
-// 		// price
-// 		req.LimitPrice = gLimitPrice;
-// 		// valuid type
-// 		///Time condition: 
-// 		req.TimeCondition = THOST_FTDC_TC_IOC;
-// 		req.VolumeCondition = THOST_FTDC_VC_AV;
-// 	}
-	
-// 	///GTD date
-// 	//TThostFtdcDateType	GTDDate;
-
-// 	///stop price
-// 	//TThostFtdcPriceType	StopPrice;
-// 	cout<<"set req\n";
-// 	return req;
-	
-// }
-
 //get the CThostFtdcInputOrderField according to config.ini
 CThostFtdcInputOrderField CTraderSpi::ReadOrderFieldIni(char* filePath){
 	// OrderField used in OrderInsert
@@ -528,6 +342,7 @@ CThostFtdcInputOrderField CTraderSpi::ReadOrderFieldIni(char* filePath){
 	strcpy(req.InvestorID, gInvestorID);
 	///order reference
 	strcpy(req.OrderRef, gOrderRef);
+
 	cout<< "gOrderRef=" << gOrderRef <<endl;
 	int iOrderRef = atoi(gOrderRef);
 	iOrderRef++;

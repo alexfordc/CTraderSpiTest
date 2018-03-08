@@ -116,6 +116,9 @@ public:
 	/// Request quote action
 	void ReqQuoteAction(CThostFtdcQuoteField *pQuote);
 
+	
+
+private:
 	/// Receive a successful response or not
 	bool IsErrorRspInfo(CThostFtdcRspInfoField *pRspInfo);
 	/// Receive the response to my order or not 

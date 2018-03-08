@@ -11,8 +11,8 @@ MESSAGE(STATUS "This is SOURCE dir " ${SOURCE_OUTPUT_PATH})
 MESSAGE(STATUS "This is LIBRARY dir " ${LIBRARY_OUTPUT_PATH})
 
 # include h files
+add_compile_options(-std=c++11)
 include_directories(inc)
-
 add_subdirectory(src)
 
 
